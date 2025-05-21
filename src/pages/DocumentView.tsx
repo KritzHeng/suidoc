@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { NETWORK } from "@/config/constants";
 import { sign } from "crypto";
+import { useSuiClient } from "@mysten/dapp-kit";
 
 const DocumentView = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,7 @@ const DocumentView = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const navigate = useNavigate();
   const { account, connected } = useSuiWallet();
+  const suiClient = useSuiClient();
 
 
   const loadDocument = async () => {
@@ -35,7 +37,33 @@ const DocumentView = () => {
 
     setIsLoading(true);
     try {
-      const doc = await getDocumentById(id);
+      const allowlist = await suiClient.getObject({
+        id: id!,
+        options: { showContent: true },
+      });
+      const encryptedObjects = await suiClient
+        .getDynamicFields({
+          parentId: id!,
+        })
+        .then((res) => res.data.map((obj) => obj.name.value as string));
+      const fields = (allowlist.data?.content as { fields: any })?.fields || {};
+      const feedData = {
+        allowlistId: id!,
+        allowlistName: fields?.name,
+        blobIds: encryptedObjects,
+      };
+      console.log("feedData:", feedData);
+
+      // const doc = await getDocumentById(id);
+      const doc = {
+        id: id!,
+        title: fields?.name,
+        uploadedBy: fields?.uploadedBy,
+        uploadedAt: new Date(fields?.uploadedAt),
+        status: fields?.status || "draft",
+        signatureFields: fields?.signatureFields || [],
+        sharedWith: fields?.sharedWith || [],
+      }
       if (doc) {
         setDocument(doc);
         // Load signature history after document is loaded

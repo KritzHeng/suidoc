@@ -195,10 +195,14 @@ export const getDocuments = async (): Promise<Document[]> => {
 };
 
 export const getDocumentById = async (
-  id: string
+  id: string,
+  document: Document | undefined = undefined
 ): Promise<Document | undefined> => {
   // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // await new Promise((resolve) => setTimeout(resolve, 500));
+  // return (
+    
+  // );
   return mockDocuments.find((doc) => doc.id === id);
 };
 

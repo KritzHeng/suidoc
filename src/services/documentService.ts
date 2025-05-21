@@ -66,7 +66,6 @@ const mockDocuments: Document[] = [
   },
 ];
 
-
 export async function getAllDocumentObjects(
   clent: any,
   ownerAddress: string
@@ -111,7 +110,6 @@ export async function getAllDocumentObjects(
     throw error;
   }
 }
-
 
 /**
  * Fetches the signature history for a document
@@ -201,7 +199,7 @@ export const getDocumentById = async (
   // Simulate API call delay
   // await new Promise((resolve) => setTimeout(resolve, 500));
   // return (
-    
+
   // );
   return mockDocuments.find((doc) => doc.id === id);
 };
@@ -307,12 +305,16 @@ export const uploadDocument = async (
   });
 
   // Helper functions
-  const getServiceUrl = (type: 'aggregator' | 'publisher', path: string): string => {
+  const getServiceUrl = (
+    type: "aggregator" | "publisher",
+    path: string
+  ): string => {
     const service = WALRUS_SERVICES.find((s) => s.id === walrusServiceId);
     if (!service) throw new Error(`Service ${walrusServiceId} not found`);
-    
+
     const cleanPath = path.replace(/^\/+/, "").replace(/^v1\//, "");
-    const baseUrl = type === 'aggregator' ? service.aggregatorUrl : service.publisherUrl;
+    const baseUrl =
+      type === "aggregator" ? service.aggregatorUrl : service.publisherUrl;
     return `${baseUrl}/v1/${cleanPath}`;
   };
 
@@ -353,20 +355,30 @@ export const uploadDocument = async (
     }
   };
 
-  const storeBlob = async (encryptedData: Uint8Array): Promise<{ info: any }> => {
-    const response = await fetch(getServiceUrl('publisher', `/v1/blobs?epochs=${NUM_EPOCH}`), {
-      method: "PUT",
-      body: encryptedData,
-    });
+  const storeBlob = async (
+    encryptedData: Uint8Array
+  ): Promise<{ info: any }> => {
+    const response = await fetch(
+      getServiceUrl("publisher", `/v1/blobs?epochs=${NUM_EPOCH}`),
+      {
+        method: "PUT",
+        body: encryptedData,
+      }
+    );
 
     if (response.status !== 200) {
-      throw new Error("Error publishing the blob on Walrus, please select a different Walrus service.");
+      throw new Error(
+        "Error publishing the blob on Walrus, please select a different Walrus service."
+      );
     }
 
     return response.json().then((info) => ({ info }));
   };
 
-  const displayUpload = async (storageInfo: any, mediaType: string): Promise<Data> => {
+  const displayUpload = async (
+    storageInfo: any,
+    mediaType: string
+  ): Promise<Data> => {
     let info: Data;
 
     if ("alreadyCertified" in storageInfo) {
@@ -377,7 +389,10 @@ export const uploadDocument = async (
         suiRefType: "Previous Sui Certified Event",
         suiRef: storageInfo.alreadyCertified.event.txDigest,
         suiBaseUrl: SUI_VIEW_TX_URL,
-        blobUrl: getServiceUrl('aggregator', `/v1/blobs/${storageInfo.alreadyCertified.blobId}`),
+        blobUrl: getServiceUrl(
+          "aggregator",
+          `/v1/blobs/${storageInfo.alreadyCertified.blobId}`
+        ),
         suiUrl: `${SUI_VIEW_OBJECT_URL}/${storageInfo.alreadyCertified.event.txDigest}`,
         isImage: mediaType.startsWith("image"),
       };
@@ -389,7 +404,10 @@ export const uploadDocument = async (
         suiRefType: "Associated Sui Object",
         suiRef: storageInfo.newlyCreated.blobObject.id,
         suiBaseUrl: SUI_VIEW_OBJECT_URL,
-        blobUrl: getServiceUrl('aggregator', `/v1/blobs/${storageInfo.newlyCreated.blobObject.blobId}`),
+        blobUrl: getServiceUrl(
+          "aggregator",
+          `/v1/blobs/${storageInfo.newlyCreated.blobObject.blobId}`
+        ),
         suiUrl: `${SUI_VIEW_OBJECT_URL}/${storageInfo.newlyCreated.blobObject.id}`,
         isImage: mediaType.startsWith("image"),
       };
@@ -461,7 +479,7 @@ export const uploadDocument = async (
 
     // Create and return document
     const newDoc: Document & { walrusBlobId?: string } = {
-      id: `doc-${Date.now()}`,
+      id: allowlistId,
       title,
       uploadedBy,
       uploadedAt: new Date(),
@@ -479,7 +497,6 @@ export const uploadDocument = async (
     throw error;
   }
 };
-
 
 export const shareDocument = async (
   documentId: string,

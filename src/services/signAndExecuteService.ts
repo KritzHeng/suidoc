@@ -80,22 +80,44 @@ export async function createAllowlist(name: string, wallet: any): Promise<any> {
 
 export async function addToAllowlist(
   allowlistObjectId: string,
-  capId: string,
   wallet: any
 ): Promise<any> {
   const rpcUrl = getFullnodeUrl("testnet");
   const client = new SuiClient({ url: rpcUrl });
 
+  const res = await client.getOwnedObjects({
+    owner: wallet.address,
+    options: {
+      showContent: true,
+      showType: true,
+    },
+    filter: {
+      StructType: `${WALRUS_PACKAGE_ID}::allowlist::Cap`,
+    },
+  });
+  const capId = res.data
+    .map((obj) => {
+      const fields = (obj!.data!.content as { fields: any }).fields;
+      return {
+        id: fields?.id.id,
+        allowlist_id: fields?.allowlist_id,
+      };
+    })
+    .filter((item) => item.allowlist_id === allowlistObjectId)
+    .map((item) => item.id) as string[];
+
   const txb = new Transaction();
   txb.moveCall({
     arguments: [
       txb.object(allowlistObjectId),
-      txb.object(capId),
+      txb.object(capId[0]),
       txb.pure.address(wallet.address.trim()),
     ],
     target: `${WALRUS_PACKAGE_ID}::allowlist::add`,
   });
   txb.setGasBudget(10000000);
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
   const resultAdd = await wallet.signAndExecuteTransaction({
     transaction: txb,
@@ -131,29 +153,9 @@ export async function isInAllowlist(
   const list: string[] = Array.isArray(fields.list) ? fields.list : [];
   console.log("List:", list);
   console.log("Wallet address:", wallet.address);
+  const acc = wallet.address;
 
-  // const allowlistforcap = await client.getObject({
-  //   id: allowlistObjectId!,
-  //   options: { showContent: true },
-  // });
-
-  // const capId = fields.data
-  //   .map((obj) => {
-  //     const fields = (obj!.data!.content as { fields: any }).fields;
-  //     return {
-  //       id: fields?.id.id,
-  //       allowlist_id: fields?.allowlist_id,
-  //     };
-  //   })
-  //   .filter((item) => item.allowlist_id === allowlistObjectId)
-  //   .map((item) => item.id) as string[];
-  // console.log("Cap ID:", capId);
-
-  if (wallet.address in list) {
-    console.log("User is in allowlist");
-    return true;
-  } else {
-    console.log("User is not in allowlist");
-    return false;
-  }
+  const isMember = list.includes(acc);
+  console.log(isMember ? "User is in allowlist" : "User is not in allowlist");
+  return isMember;
 }

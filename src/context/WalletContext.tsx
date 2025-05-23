@@ -1,7 +1,12 @@
-
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { WalletAccount } from '@/types';
-import { toast } from '@/lib/toast';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
+import { WalletAccount } from "@/types";
+import { toast } from "@/lib/toast";
 
 interface WalletContextType {
   isConnected: boolean;
@@ -16,7 +21,7 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export const useWallet = () => {
   const context = useContext(WalletContext);
   if (context === undefined) {
-    throw new Error('useWallet must be used within a WalletProvider');
+    throw new Error("useWallet must be used within a WalletProvider");
   }
   return context;
 };
@@ -32,32 +37,34 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
 
   // Check if Sui wallet is available in window object
   const isSuiWalletAvailable = (): boolean => {
-    return typeof window !== 'undefined' && 'suiWallet' in window;
+    return typeof window !== "undefined" && "suiWallet" in window;
   };
 
   // Connect to Sui wallet
   const connectToSuiWallet = async (): Promise<WalletAccount> => {
     try {
       if (!isSuiWalletAvailable()) {
-        throw new Error('Sui wallet not found. Please install Sui wallet extension');
+        throw new Error(
+          "Sui wallet not found. Please install Sui wallet extension"
+        );
       }
 
       // @ts-ignore - Sui wallet types are not available
       const accounts = await window.suiWallet.getAccounts();
-      
+
       if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found in Sui wallet');
+        throw new Error("No accounts found in Sui wallet");
       }
-      
+
       // Use the first account
       const walletAddress = accounts[0];
-      
+
       return {
         address: walletAddress,
         publicKey: walletAddress, // In a real implementation, you would get the actual public key
       };
     } catch (error) {
-      console.error('Error connecting to Sui wallet:', error);
+      console.error("Error connecting to Sui wallet:", error);
       throw error;
     }
   };
@@ -66,8 +73,14 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   const connectToMockWallet = async (): Promise<WalletAccount> => {
     // Mock successful connection
     return {
-      address: '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(''),
-      publicKey: 'mock_public_key_' + Math.random().toString(36).substring(2, 15),
+      address:
+        "0x" +
+        Array(40)
+          .fill(0)
+          .map(() => Math.floor(Math.random() * 16).toString(16))
+          .join(""),
+      publicKey:
+        "mock_public_key_" + Math.random().toString(36).substring(2, 15),
     };
   };
 
@@ -75,50 +88,65 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   const connectToEthosWallet = async (): Promise<WalletAccount> => {
     // Mock successful connection with an Ethos-like address
     return {
-      address: '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(''),
-      publicKey: 'ethos_public_key_' + Math.random().toString(36).substring(2, 15),
+      address:
+        "0x" +
+        Array(40)
+          .fill(0)
+          .map(() => Math.floor(Math.random() * 16).toString(16))
+          .join(""),
+      publicKey:
+        "ethos_public_key_" + Math.random().toString(36).substring(2, 15),
     };
   };
 
   const connectWallet = async (preferredWalletType?: string) => {
     try {
-      console.log('Connecting to wallet...', preferredWalletType);
+      console.log("Connecting to wallet...", preferredWalletType);
       let connectedAccount: WalletAccount;
-      let selectedWalletType = preferredWalletType || 'sui';
-      
+      let selectedWalletType = preferredWalletType || "sui";
+
       switch (selectedWalletType) {
-        case 'sui':
+        case "sui":
           if (isSuiWalletAvailable()) {
             connectedAccount = await connectToSuiWallet();
-            setWalletType('sui');
+            setWalletType("sui");
           } else {
-            throw new Error('Sui wallet not detected. Please install the extension');
+            throw new Error(
+              "Sui wallet not detected. Please install the extension"
+            );
           }
           break;
-          
-        case 'ethos':
+
+        case "ethos":
           connectedAccount = await connectToEthosWallet();
-          setWalletType('ethos');
+          setWalletType("ethos");
           break;
-          
-        case 'mock':
+
+        case "mock":
         default:
-          console.log('Using mock wallet');
+          console.log("Using mock wallet");
           connectedAccount = await connectToMockWallet();
-          setWalletType('mock');
+          setWalletType("mock");
           break;
       }
-      
+
       setAccount(connectedAccount);
       setIsConnected(true);
-      
-      const walletName = selectedWalletType === 'sui' ? 'Sui Wallet' : 
-                         selectedWalletType === 'ethos' ? 'Ethos Wallet' : 'Demo Wallet';
-      
+
+      const walletName =
+        selectedWalletType === "sui"
+          ? "Sui Wallet"
+          : selectedWalletType === "ethos"
+          ? "Ethos Wallet"
+          : "Demo Wallet";
+
       toast.success(`Wallet connected: ${walletName}`);
     } catch (error) {
-      console.error('Failed to connect wallet:', error);
-      toast.error('Failed to connect wallet: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error("Failed to connect wallet:", error);
+      toast.error(
+        "Failed to connect wallet: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
       throw error;
     }
   };
@@ -127,41 +155,49 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     setIsConnected(false);
     setAccount(null);
     setWalletType(null);
-    toast.success('Wallet disconnected');
+    toast.success("Wallet disconnected");
   };
 
   const signMessage = async (message: string): Promise<string | null> => {
     if (!isConnected || !account) {
-      toast.error('Wallet not connected');
+      toast.error("Wallet not connected");
       return null;
     }
 
     try {
       let signature;
 
-      if (walletType === 'sui' && isSuiWalletAvailable()) {
+      if (walletType === "sui" && isSuiWalletAvailable()) {
         // @ts-ignore - Sui wallet types are not available
         signature = await window.suiWallet.signMessage({
           message: new TextEncoder().encode(message),
           account: account.address,
         });
-        
+
         return signature.signature;
       } else {
         // Mock signing for development
         console.log(`Signing message with ${walletType} wallet: ${message}`);
-        
+
         // Mock signing delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
         // Mock transaction ID
-        const transactionId = '0x' + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-        
+        const transactionId =
+          "0x" +
+          Array(64)
+            .fill(0)
+            .map(() => Math.floor(Math.random() * 16).toString(16))
+            .join("");
+
         return transactionId;
       }
     } catch (error) {
-      console.error('Failed to sign message:', error);
-      toast.error('Failed to sign message: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error("Failed to sign message:", error);
+      toast.error(
+        "Failed to sign message: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
       return null;
     }
   };
@@ -175,8 +211,6 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   };
 
   return (
-    <WalletContext.Provider value={value}>
-      {children}
-    </WalletContext.Provider>
+    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
   );
 };

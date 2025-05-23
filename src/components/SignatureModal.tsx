@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,38 +7,27 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Loader2 } from 'lucide-react';
-import { useWallet } from '@/context/WalletContext';
-import { toast } from '@/lib/toast';
+} from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 import {
-  ConnectButton,
-  useAccountBalance,
   useWallet as useSuiWallet,
-  SuiChainId,
-  ErrorCode,
-  verifySignedMessage
 } from "@suiet/wallet-kit";
-import { bcs } from '@mysten/bcs';
-import { Transaction } from '@mysten/sui/transactions';
-import { Ed25519Keypair, Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
+import { bcs } from "@mysten/bcs";
+import { Transaction } from "@mysten/sui/transactions";
+import { SUIDOC_PACKAGE_ID, SUIDOC_MODULE } from "@/config/constants";
 
-// use getFullnodeUrl to define Devnet RPC location
-const rpcUrl = getFullnodeUrl('devnet');
-const suiClient = new SuiClient({ url: rpcUrl });
-
-const PACKAGE_ID = "0xcf7aa4af593290d9552ccf225c777697c7113c6722b417bcdb1965417a94f550";
-const MODULE = "document";
-const NETWORK = "devnet";
 
 // Example SHA-256 hash (64 hex chars = 32 bytes)
-const docHash = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
+const docHash =
+  "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
 const cid = "QmXYZ123"; // IPFS CID
 // In a real app, you'd generate this properly using a crypto library
-const signature = "deadbeef12345678deadbeef12345678deadbeef12345678deadbeef12345678";
+const signature =
+  "deadbeef12345678deadbeef12345678deadbeef12345678deadbeef12345678";
 
 interface SignatureModalProps {
+  doc_id: string;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (transactionId: string) => void;
@@ -46,51 +35,48 @@ interface SignatureModalProps {
 }
 
 const SignatureModal: React.FC<SignatureModalProps> = ({
+  doc_id,
   isOpen,
   onClose,
   onConfirm,
   documentTitle,
 }) => {
   const [isSigning, setIsSigning] = useState(false);
-  const { signMessage, account } = useWallet();
+  const { signMessage, account } = useSuiWallet();
   const wallet = useSuiWallet(); // Moved inside the component
 
   const signDocument = async () => {
     if (!wallet.connected) return;
-    
+
     setIsSigning(true);
     try {
-    
       const msgBytes = new TextEncoder().encode(docHash);
+
       let result = await wallet.signPersonalMessage({
         message: msgBytes,
       });
       // convert result to hex string
-      const hexString = result.signature.toString('hex');
+      const hexString = result.signature.toString("hex");
 
-    
+      // const doc_id = "0x1de23f8645acf310d859fd7c7163544c9d48a6ea19f67777c80d66efa41df44a"
       const txb = new Transaction();
 
-      const docHashBytes: any = bcs.string().serialize(docHash);
+      // const docHashBytes: any = bcs.string().serialize(docHash);
       const signatureBytes: any = bcs.string().serialize(hexString);
 
       txb.moveCall({
-        target: `${PACKAGE_ID}::${MODULE}::sign_document`,
-        arguments: [
-          txb.pure(docHashBytes),
-          txb.pure(signatureBytes),
-        ],
+        target: `${SUIDOC_PACKAGE_ID}::${SUIDOC_MODULE}::sign_document`,
+        arguments: [txb.pure.string(doc_id), txb.pure(signatureBytes)],
       });
 
       txb.setGasBudget(50_000_000); // 0.05 SUI
 
       result = await wallet.signAndExecuteTransaction({
-        transaction: txb
+        transaction: txb,
       });
-
-      if (result) {
-        onConfirm(result.digest);
-      }
+      
+      console.log("Transaction result:", result);
+      onClose()
     } catch (error) {
       console.error("Signing failed:", error);
       toast.error("Failed to sign document");
@@ -101,32 +87,33 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-full sm:max-w-lg lg:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Sign Document</DialogTitle>
           <DialogDescription>
-            You are about to sign this document using your connected wallet. This action will be recorded on the Sui blockchain.
+            You are about to sign this document using your connected wallet.
+            This action will be recorded on the Sui blockchain.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="py-4">
           <div className="bg-muted p-4 rounded-md mb-4">
             <p className="text-sm font-medium mb-2">Document</p>
             <p className="text-sm">{documentTitle}</p>
           </div>
-          
+
           <div className="bg-muted p-4 rounded-md">
             <p className="text-sm font-medium mb-2">Wallet Signer</p>
             <p className="text-sm font-mono">{account?.address}</p>
           </div>
         </div>
-        
+
         <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
           <Button variant="outline" onClick={onClose} disabled={isSigning}>
             Cancel
           </Button>
-          <Button 
-            onClick={signDocument} 
+          <Button
+            onClick={signDocument}
             disabled={isSigning || !account}
             className="bg-sui-teal hover:bg-sui-teal/90"
           >

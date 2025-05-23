@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { toast } from '@/lib/toast';
 import { Input } from '@/components/ui/input';
 import { Check, Plus, Trash2, Users } from 'lucide-react';
-import { toast } from '@/lib/toast';
 
 interface ShareModalProps {
   isOpen: boolean;

@@ -1,73 +1,39 @@
-# Welcome to your Lovable project
+# SuiDoc
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/4634f65d-f751-4314-8da5-1a6f3deea30f
+Project Description
+SuiDoc is a secure, blockchain-based electronic document signing platform that simplifies digital workflows with multi-party signing, document storage, and customizable templates. The platform leverages the Walrus decentralized storage system on the Sui blockchain for immutable, tamper-proof, and scalable document storage. Advanced encryption protects document privacy, ensuring only authorized users can access sensitive data. Users can store documents securely, sign them collaboratively with multi-signature support, and utilize reusable templates to streamline recurring processes. SuiDoc integrates AI-powered live chat support for real-time assistance, delivering a seamless, secure, and efficient electronic document management experience by combining blockchain immutability with privacy-focused encryption.
 
-## How can I edit this code?
+**URL**: https://sui-sign-vault.vercel.app
 
-There are several ways of editing your application.
+## 🚀 Features
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/4634f65d-f751-4314-8da5-1a6f3deea30f) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Seamless Wallet Creation**: Users connect using their Sui wallet to interact with the SuiDoc platform effortlessly.
+- **On-Chain Document Registration**: Uploaded documents are registered on-chain through Sui smart contracts, linking ownership to the user's wallet.
+- **Secure Decentralized Storage**: All documents are encrypted and securely stored using Walrus, a decentralized storage system designed for privacy and resilience.
+- **Encrypted Document Retrieval**: Users can retrieve and decrypt documents locally using their private wallet keys, ensuring full control over their data.
+- **Client-Side Document Signing**: Documents are signed locally within the user's wallet, enhancing security by keeping private keys off-chain.
+- **On-Chain Signature Verification**: The platform verifies signatures on-chain to confirm document authenticity and ownership, enabling trustless verification. 
 
 ## What technologies are used for this project?
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### ⚙️ Core Stack
+- [Vite](https://vitejs.dev/) – Fast build tool and dev server
+- [React](https://react.dev/) – Declarative UI library
+- [TypeScript](https://www.typescriptlang.org/) – Strongly-typed JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) – Utility-first CSS framework
+- [@mysten/sui](https://docs.sui.io/) – Sui blockchain SDK
+- [@mysten/dapp-kit](https://docs.sui.io/devnet/build/dapp-kit) – Sui dApp development utilities
+- [@mysten/seal](https://github.com/MystenLabs/seal) – Sealed-box encryption for the Sui ecosystem. Encrypts data client-side for a recipient's public key using Libsodium-based cryptography. Works with [Walrus](https://github.com/MystenLabs/walrus), a secure multi-party computation (MPC) backend that enables privacy-preserving decryption without exposing private keys.
+- [@suiet/wallet-kit](https://www.npmjs.com/package/@suiet/wallet-kit) – Sui wallet integration
 
-## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/4634f65d-f751-4314-8da5-1a6f3deea30f) and click on Share -> Publish.
+# Diagrams
 
-## Can I connect a custom domain to my Lovable project?
+Upload, Sign, Verified Workflow
 
-Yes it is!
+![Account Creation](/public/sequence-diagram.png)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

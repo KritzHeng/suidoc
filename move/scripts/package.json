@@ -1,0 +1,20 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "init-keypair": "ts-node src/init.ts",
+    "return-objects": "ts-node src/lessons/return_objects/exercise.ts",
+    "input-objects": "ts-node src/lessons/input_objects/exercise.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.8.0",
+    "dotenv": "^16.4.5"
+  }
+}
